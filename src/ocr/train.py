@@ -6,10 +6,10 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision.transforms import transforms
-from src.dataset import PlateDataset
+from src.ocr.dataset import PlateDataset
 from src.config import BATCH_SIZE, CHAR_LIST, LEARNING_RATE, EPOCHS, IDX2CHAR
-from src.model import CRNN
-from src.utils import ctc_decode, calculate_accuracy
+from src.ocr.model import CRNN
+from src.ocr.utils import ctc_decode, calculate_accuracy
 
 
 def train():
