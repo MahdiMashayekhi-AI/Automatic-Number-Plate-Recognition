@@ -216,3 +216,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Virtual Environmnet
+anpr/
+
+# Data
+data/
+
+# Models
+**.pt
+**.pth
