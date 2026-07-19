@@ -61,4 +61,4 @@ class PlateTracker:
     for track_id in tracks_to_remove:
       del self.track_states[track_id]
     
-    return self.track_states
+    return current_frame_output

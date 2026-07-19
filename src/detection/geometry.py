@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from src.config import IMAGE_HEIGHT, IMAGE_WIDTH
 
 
 def order_points(points):
@@ -19,7 +20,7 @@ def order_points(points):
 def crop_and_deskew(image, keypoints):
     ordered_points = order_points(keypoints)
 
-    destination_points = np.array([[0, 0], [128, 0], [128, 32], [0, 32]], dtype=np.float32)
+    destination_points = np.array([[0, 0], [IMAGE_WIDTH, 0], [IMAGE_WIDTH, IMAGE_HEIGHT], [0, IMAGE_HEIGHT]], dtype=np.float32)
     
     matrix = cv2.getPerspectiveTransform(ordered_points, destination_points)
 
