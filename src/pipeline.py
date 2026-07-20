@@ -36,7 +36,7 @@ class ANPRPipeline:
           tracks_to_remove.append(track_id)
 
     for track_id in tracks_to_remove:
-      def self.missing_frames[track_id]
+      del self.missing_frames[track_id]
 
     return frame_results
 
