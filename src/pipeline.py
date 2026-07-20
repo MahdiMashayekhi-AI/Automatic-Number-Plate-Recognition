@@ -1,4 +1,3 @@
-import torch
 from src.tracking.tracker import PlateTracker
 from src.ocr.predictor import PlateReader
 from src.decision.voting import TemporalVoter
