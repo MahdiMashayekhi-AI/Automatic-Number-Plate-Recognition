@@ -34,7 +34,6 @@ class PlateTracker:
             self.track_states[track_id] = {
               "conf": conf,
               "plate": deskewed_plate,
-              # "bbox": [xmin, ymin, xmax, ymax],
               "missing_frames": 0
             }
 
@@ -42,8 +41,6 @@ class PlateTracker:
             if self.track_states[track_id]['conf'] < conf:
               self.track_states[track_id]["conf"] = conf
               self.track_states[track_id]["plate"] = deskewed_plate
-              # self.track_states[track_id]["bbox"] = [xmin, ymin, xmax, ymax]
-              # self.track_states[track_id]["missing_frames"] = 0
 
           current_frame_output[track_id] = {
             "conf": conf,
