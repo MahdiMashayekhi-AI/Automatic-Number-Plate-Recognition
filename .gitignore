@@ -226,3 +226,6 @@ data/
 # Models
 **.pt
 **.pth
+
+# Databases
+**.db
