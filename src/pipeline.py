@@ -1,7 +1,7 @@
 from src.tracking.tracker import PlateTracker
 from src.ocr.predictor import PlateReader
 from src.decision.voting import TemporalVoter
-from src.database.connection import session, Base, engine
+from src.database.connection import get_db_context, Base, engine
 from src.database.models import DetectedPlate
 
 
@@ -15,7 +15,6 @@ class ANPRPipeline:
 
     self.missing_frames = {}
     self.saved_track = set()
-    self.db = session()
 
   def process_frame(self, frame):
     frame_results = {}
@@ -52,9 +51,9 @@ class ANPRPipeline:
   def _save_to_db(self, track_id, plate_text, confidence):
     if track_id not in self.saved_track:
       if plate_text and plate_text != "UNKNOWN!" and "؟" not in plate_text:
-        plate = DetectedPlate(track_id=track_id, plate_text=plate_text, confidence=confidence)
-        self.db.add(plate)
-        self.db.commit()
+        with get_db_context() as db:
+          plate = DetectedPlate(track_id=track_id, plate_text=plate_text, confidence=confidence)
+          db.add(plate)
 
         self.saved_track.add(track_id)
 

@@ -1,23 +1,29 @@
 import cv2
 import torch
+import logging
+from src.logger import setup_logger
 from src.pipeline import ANPRPipeline
 
 
 def main():
+  setup_logger()
+
+  logger = logging.getLogger(__name__)
+
   TRACKER_MODEL = "license_plate_keypoint.pt"
   OCR_MODEL = "outputs/best_model.pt"
   VIDEO_PATH = "./data/samples/Tehran-Traffic.mp4"
   DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-  print("[INFO] Loading ANPR Pipeline...")
+  logger.info("Loading ANPR Pipeline...")
   pipeline = ANPRPipeline(TRACKER_MODEL, OCR_MODEL, DEVICE)
 
   cap = cv2.VideoCapture(VIDEO_PATH)
   if not cap.isOpened():
-    print(f"[ERROR] Could not open video: {VIDEO_PATH}")
+    logger.error(f"Could not open video: {VIDEO_PATH}")
     return
   
-  print("[INFO] Starting video processing. Press 'q' to quit.")
+  logger.info("Starting video processing. Press 'q' to quit.")
   while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
@@ -42,7 +48,7 @@ def main():
 
   cap.release()
   cv2.destroyAllWindows()
-  print("[INFO] Processing finished successfully.")
+  logger.info("Processing finished successfully.")
 
 
 if __name__ == "__main__":

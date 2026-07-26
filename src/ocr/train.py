@@ -1,5 +1,6 @@
 import os
 import torch
+import logging
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim 
@@ -13,6 +14,8 @@ from src.ocr.utils import ctc_decode, calculate_accuracy
 
 
 def train():
+  logger = logging.getLogger(__name__)
+
   device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
   
   train_dataset = PlateDataset("data/raw/", "train_labels.txt", None)
@@ -57,7 +60,7 @@ def train():
       optimizer.step()
 
     avg_loss = total_loss / total_samples
-    print(f"Epoch {epoch + 1}, Train Loss: {avg_loss}")
+    logger.info(f"Epoch {epoch + 1}, Train Loss: {avg_loss}")
 
     total_loss = 0
     total_samples = 0
@@ -91,12 +94,12 @@ def train():
         cer_list.append(cer)
 
     avg_loss = total_loss / total_samples
-    print(f"Epoch {epoch + 1}, Test Loss: {avg_loss}")
+    logger.info(f"Epoch {epoch + 1}, Test Loss: {avg_loss}")
 
     avg_acc = sum(acc_list) / len(acc_list)
     avg_cer = sum(cer_list) / len(cer_list)
 
-    print(f"Accuracy: {avg_acc}, CER: {avg_cer}")
+    logger.info(f"Accuracy: {avg_acc}, CER: {avg_cer}")
 
     if not os.path.exists("outputs"):
       os.mkdir("outputs")
@@ -107,7 +110,7 @@ def train():
 
     sample_pred = ctc_decode(log_probs.detach())[0]
     sample_target = ''.join([IDX2CHAR[c.item()] for c in label[0][:label_len[0].item()]])
-    print(f"Pred: {sample_pred} | GT: {sample_target}")
+    logger.info(f"Pred: {sample_pred} | GT: {sample_target}")
 
 
 if __name__ == "__main__":
