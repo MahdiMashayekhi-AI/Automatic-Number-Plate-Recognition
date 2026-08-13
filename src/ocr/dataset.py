@@ -9,7 +9,7 @@ from src.config import CHAR2IDX, IDX2CHAR, IMAGE_WIDTH, IMAGE_HEIGHT
 
 
 class PlateDataset(Dataset):
-  def __init__(self, root_dir, label_file, transform=None):
+  def __init__(self, root_dir, label_file, transform=None, return_path=False):
     self.root_dir = root_dir
     self.df = pd.read_csv(os.path.join(self.root_dir, label_file), sep=" ", header=None, names=['image_path', 'label'])
 
@@ -17,6 +17,8 @@ class PlateDataset(Dataset):
       self.transform = transforms.ToTensor()
     else:
       self.transform = transform
+
+    self.return_path = return_path
 
   def __len__(self):
     return len(self.df)
@@ -39,5 +41,8 @@ class PlateDataset(Dataset):
     numerical_label = torch.LongTensor([CHAR2IDX[letter] for letter in label])
     label_len = len(label)
 
+    if self.return_path:
+      return normalized, numerical_label, label_len, image_path
+    
     return normalized, numerical_label, label_len
 
