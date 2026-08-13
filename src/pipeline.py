@@ -1,3 +1,4 @@
+import cv2
 from src.tracking.tracker import PlateTracker
 from src.ocr.predictor import PlateReader
 from src.decision.voting import TemporalVoter
@@ -6,7 +7,7 @@ from src.database.models import DetectedPlate
 
 
 class ANPRPipeline:
-  def __init__(self, tracker_model_path, ocr_model_path, device=None):
+  def __init__(self, tracker_model_path, ocr_model_path, device=None, blur_threshold=70):
     Base.metadata.create_all(bind=engine)
 
     self.tracker = PlateTracker(tracker_model_path)
@@ -15,6 +16,7 @@ class ANPRPipeline:
 
     self.missing_frames = {}
     self.saved_track = set()
+    self.blur_threshold = blur_threshold
 
   def process_frame(self, frame):
     frame_results = {}
@@ -23,9 +25,12 @@ class ANPRPipeline:
     for track_id, state in current_frame_outputs.items():
       self.missing_frames[track_id] = 0
 
-      plate_text = self.reader.predict(state['plate'])
+      laplacian_var = cv2.Laplacian(state['plate'], cv2.CV_64F).var()
 
-      self.voter.add_prediction(track_id, plate_text)
+      if laplacian_var >= self.blur_threshold:
+        plate_text = self.reader.predict(state['plate'])
+        self.voter.add_prediction(track_id, plate_text)
+        
       final_plate_text = self.voter.get_final_plate(track_id)
 
       self._save_to_db(track_id, final_plate_text, state['conf'])
