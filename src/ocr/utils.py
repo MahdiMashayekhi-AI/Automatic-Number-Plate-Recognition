@@ -42,3 +42,17 @@ def calculate_accuracy(preds, targets):
   cer = total_distance / total_chars
 
   return acc, cer
+
+def calculate_metrics(preds, targets):
+  correct_sequences = 0
+  total_samples = 0
+  total_distance = 0
+  total_chars = 0
+
+  for pred, target in zip(preds, targets):
+    correct_sequences += 1 if pred == target else 0
+    total_distance += l.distance(pred, target)
+    total_samples += 1
+    total_chars += len(target)
+
+  return correct_sequences, total_samples, total_distance, total_chars
