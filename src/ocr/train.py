@@ -19,12 +19,12 @@ def train():
   device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
   
   train_dataset = PlateDataset("data/raw/", "train_labels.txt", None)
-  test_dataset = PlateDataset("data/raw/", "test_labels.txt", None)
+  val_dataset = PlateDataset("data/raw/", "val_labels.txt", None)
 
-  train_loader = DataLoader(train_dataset, BATCH_SIZE, True)
-  test_loader = DataLoader(test_dataset, BATCH_SIZE, False)
+  train_loader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=True)
+  val_loader = DataLoader(dataset=val_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
-  model = CRNN(1, len(CHAR_LIST), 256)
+  model = CRNN(input_channel=1, num_classes=len(CHAR_LIST), hidden_size=256)
   model.to(device)
 
   criterion = nn.CTCLoss(blank=0, zero_infinity=True)
@@ -70,7 +70,7 @@ def train():
 
     model.eval()
     with torch.no_grad():
-      for image, label, label_len in test_loader:
+      for image, label, label_len in val_loader:
         image, label = image.to(device), label.to(device)
 
         outputs = model(image)
@@ -94,7 +94,7 @@ def train():
         cer_list.append(cer)
 
     avg_loss = total_loss / total_samples
-    logger.info(f"Epoch {epoch + 1}, Test Loss: {avg_loss}")
+    logger.info(f"Epoch {epoch + 1}, Validation Loss: {avg_loss}")
 
     avg_acc = sum(acc_list) / len(acc_list)
     avg_cer = sum(cer_list) / len(cer_list)
