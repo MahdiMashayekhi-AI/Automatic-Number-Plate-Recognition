@@ -5,18 +5,21 @@ import numpy as np
 import torch.nn as nn
 import torch.optim as optim 
 import torch.nn.functional as F
+from src.logger import setup_logger
+from tqdm import tqdm
 from torch.utils.data import DataLoader
-from torchvision.transforms import transforms
 from src.ocr.dataset import PlateDataset
 from src.config import BATCH_SIZE, CHAR_LIST, LEARNING_RATE, EPOCHS, IDX2CHAR
 from src.ocr.model import CRNN
-from src.ocr.utils import ctc_decode, calculate_accuracy
+from src.ocr.utils import ctc_decode, calculate_metrics
 
 
 def train():
+  setup_logger()
   logger = logging.getLogger(__name__)
 
   device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+  logger.info(f"Device is {device}")
   
   train_dataset = PlateDataset("data/raw/", "train_labels.txt", None)
   val_dataset = PlateDataset("data/raw/", "val_labels.txt", None)
@@ -30,14 +33,16 @@ def train():
   criterion = nn.CTCLoss(blank=0, zero_infinity=True)
   optimizer = optim.Adam(model.parameters(), LEARNING_RATE)
 
-  min_acc = 0
+  best_sequence_accuracy = 0
 
   for epoch in range(EPOCHS):
     total_loss = 0
     total_samples = 0
     
     model.train()
-    for image, label, label_len in train_loader:
+    for image, label, label_len in tqdm(
+      train_loader,
+      desc=f"Epoch {epoch + 1}/{EPOCHS}"):
       image, label = image.to(device), label.to(device)
 
       optimizer.zero_grad()
@@ -65,12 +70,17 @@ def train():
     total_loss = 0
     total_samples = 0
 
-    acc_list = []
-    cer_list = []
+    total_correct = 0
+    total_sequences = 0
+    total_distance = 0
+    total_chars = 0
 
     model.eval()
     with torch.no_grad():
-      for image, label, label_len in val_loader:
+      for image, label, label_len in tqdm(
+          val_loader,
+          desc=f"Validation {epoch + 1}/{EPOCHS}"
+      ):
         image, label = image.to(device), label.to(device)
 
         outputs = model(image)
@@ -89,24 +99,27 @@ def train():
         for lbl, length in zip(label, label_len):
           targets.append(''.join([IDX2CHAR[c.item()] for c in lbl[:length.item()]]))
 
-        acc, cer = calculate_accuracy(preds, targets)
-        acc_list.append(acc)
-        cer_list.append(cer)
+        correct, samples, distance, chars = calculate_metrics(preds, targets)
+
+        total_correct += correct
+        total_sequences += samples
+        total_distance += distance
+        total_chars += chars
 
     avg_loss = total_loss / total_samples
     logger.info(f"Epoch {epoch + 1}, Validation Loss: {avg_loss}")
 
-    avg_acc = sum(acc_list) / len(acc_list)
-    avg_cer = sum(cer_list) / len(cer_list)
+    sequence_accuracy = total_correct / total_sequences
+    cer = total_distance / total_chars
 
-    logger.info(f"Accuracy: {avg_acc}, CER: {avg_cer}")
+    logger.info(f"Sequence Accuracy: {sequence_accuracy*100:.2f}%, CER: {cer*100:.2f}%")
 
     if not os.path.exists("outputs"):
       os.mkdir("outputs")
 
-    if avg_acc > min_acc:
+    if sequence_accuracy > best_sequence_accuracy:
       torch.save(model.state_dict(), "outputs/best_model.pt")
-      min_acc = avg_acc
+      best_sequence_accuracy = sequence_accuracy
 
     sample_pred = ctc_decode(log_probs.detach())[0]
     sample_target = ''.join([IDX2CHAR[c.item()] for c in label[0][:label_len[0].item()]])
