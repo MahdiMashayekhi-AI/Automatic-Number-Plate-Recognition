@@ -69,7 +69,6 @@ def train():
 
     total_loss = 0
     total_samples = 0
-
     total_correct = 0
     total_sequences = 0
     total_distance = 0
