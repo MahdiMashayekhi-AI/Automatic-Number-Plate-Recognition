@@ -1,5 +1,7 @@
 from ultralytics import YOLO
 from src.detection.geometry import crop_and_deskew
+from src.detection.quality import compute_sharpness
+from src.config import BLUR_THRESHOLD
 
 
 class PlateTracker:
@@ -12,7 +14,7 @@ class PlateTracker:
     current_active_tracks = set()
     current_frame_output = {}
 
-    results = self.model.track(frame, tracker='bytetrack.yaml', persist=True, conf=0.4)
+    results = self.model.track(frame, tracker='custom_tracker.yaml', persist=True, conf=0.3, imgsz=960)
 
     for result in results:
       boxes = result.boxes
@@ -25,22 +27,44 @@ class PlateTracker:
           kp = kp.xy.cpu().numpy()[0]
 
           deskewed_plate = crop_and_deskew(frame, kp)
+          if deskewed_plate is None:
+            continue
+          
           conf = float(box.conf[0]) 
           track_id = int(track_id)
 
           current_active_tracks.add(track_id)
 
+          new_sharpness = compute_sharpness(deskewed_plate)
+          new_conf = conf
+
           if track_id not in self.track_states:
             self.track_states[track_id] = {
-              "conf": conf,
-              "plate": deskewed_plate,
-              "missing_frames": 0
+              'conf': new_conf,
+              'sharpness': new_sharpness,
+              'plate': deskewed_plate,
+              'missing_frames': 0
             }
-
           else:
-            if self.track_states[track_id]['conf'] < conf:
-              self.track_states[track_id]["conf"] = conf
-              self.track_states[track_id]["plate"] = deskewed_plate
+            current = self.track_states[track_id]
+            new_is_sharp = new_sharpness >= BLUR_THRESHOLD
+            current_is_sharp = current['sharpness'] >= BLUR_THRESHOLD
+
+            should_update = False
+
+            if new_is_sharp and not current_is_sharp:
+              should_update = True
+            elif new_is_sharp and current_is_sharp:
+              if new_conf > current['conf']:
+                should_update = True
+            elif not new_is_sharp and not current_is_sharp:
+              if new_sharpness > current['sharpness']:
+                should_update = True
+
+            if should_update:
+              current['conf'] = new_conf
+              current['sharpness'] = new_sharpness
+              current['plate'] = deskewed_plate
 
           current_frame_output[track_id] = {
             "conf": conf,

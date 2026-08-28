@@ -25,7 +25,8 @@ def evaluate():
   test_loader = DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
   model = CRNN(input_channel=1, num_classes=len(CHAR_LIST), hidden_size=256)
-  model.load_state_dict(torch.load("outputs/best_model.pt", map_location=device))
+  checkpoint = torch.load("outputs/checkpoints/best.pt", map_location=device)
+  model.load_state_dict(checkpoint['model_state_dict'])
   model.to(device)
   model.eval()
 

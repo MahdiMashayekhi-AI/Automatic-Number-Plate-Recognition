@@ -13,7 +13,8 @@ class PlateReader:
       self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     self.model = CRNN(1, len(CHAR_LIST), 256) 
-    self.model.load_state_dict(torch.load(model_path, map_location=self.device)) 
+    checkpoint = torch.load(model_path, map_location=self.device)
+    self.model.load_state_dict(checkpoint['model_state_dict']) 
     self.model.to(self.device)  
     self.model.eval()
 

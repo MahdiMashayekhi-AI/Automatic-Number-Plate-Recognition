@@ -24,11 +24,17 @@ class PlateDetector:
 
         points = kp.xy.cpu().numpy()[0]
 
+        xmin, ymin, xmax, ymax = map(int, box.xyxy[0])
+
         plate = crop_and_deskew(image, points)
+        if plate is None:
+          continue
+        
         deskewed_plates.append({
           "score": score,
           "keypoints": points,
           "image": plate,
+          "bbox": [xmin, ymin, xmax, ymax]
         })
 
     return deskewed_plates

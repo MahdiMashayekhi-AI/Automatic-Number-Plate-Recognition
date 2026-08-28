@@ -11,7 +11,7 @@ def main():
   logger = logging.getLogger(__name__)
 
   TRACKER_MODEL = "license_plate_keypoint.pt"
-  OCR_MODEL = "outputs/best_model.pt"
+  OCR_MODEL = "outputs/checkpoints/best.pt"
   VIDEO_PATH = "./data/samples/Tehran-Traffic.mp4"
   DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
