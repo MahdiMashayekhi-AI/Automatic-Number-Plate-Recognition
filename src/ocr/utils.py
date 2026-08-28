@@ -1,5 +1,5 @@
 import torch
-import Levenshtein as l
+import Levenshtein
 from src.config import IDX2CHAR
 
 
@@ -34,7 +34,7 @@ def calculate_accuracy(preds, targets):
   for pred, target in zip(preds, targets):
     accuracy += 1 if pred == target else 0
 
-    distance = l.distance(pred, target)
+    distance = Levenshtein.distance(pred, target)
     total_distance += distance
     total_chars += len(target)
 
@@ -51,7 +51,7 @@ def calculate_metrics(preds, targets):
 
   for pred, target in zip(preds, targets):
     correct_sequences += 1 if pred == target else 0
-    total_distance += l.distance(pred, target)
+    total_distance += Levenshtein.distance(pred, target)
     total_samples += 1
     total_chars += len(target)
 

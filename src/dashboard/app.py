@@ -18,7 +18,7 @@ st.set_page_config(
 @st.cache_resource
 def load_pipeline():
   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-  return ANPRPipeline("license_plate_keypoint.pt", "outputs/best_model.pt", device)
+  return ANPRPipeline("license_plate_keypoint.pt", "outputs/checkpoints/best.pt", device)
 
 pipeline = load_pipeline()
 
