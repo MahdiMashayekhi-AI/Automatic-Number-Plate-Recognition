@@ -1,3 +1,4 @@
+import os
 import cv2
 import torch
 import tempfile
@@ -7,17 +8,14 @@ from sqlalchemy.orm import Session
 from src.database.connection import get_db
 from src.database.models import DetectedPlate
 from src.pipeline import ANPRPipeline
+from src.config import KEYPOINT_MODEL_PATH, OCR_MODEL_PATH
 
 
-app = FastAPI(
-  title="ANPR System API"
-)
+app = FastAPI(title="ANPR System API")
 
-TRACKER_MODEL = "license_plate_keypoint.pt"
-OCR_MODEL = "outputs/checkpoints/best.pt"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-pipeline = ANPRPipeline(TRACKER_MODEL, OCR_MODEL, DEVICE)
+pipeline = ANPRPipeline(KEYPOINT_MODEL_PATH, OCR_MODEL_PATH, DEVICE)
 
 
 @app.get('/')
@@ -132,6 +130,5 @@ async def predict_video(file: UploadFile = File(...)):
 
         tfile.close()
 
-        import os
         if os.path.exists(temp_path):
             os.unlink(temp_path)

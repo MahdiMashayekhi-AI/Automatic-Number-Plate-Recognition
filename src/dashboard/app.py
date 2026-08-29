@@ -7,6 +7,7 @@ import streamlit as st
 from src.pipeline import ANPRPipeline
 from src.database.connection import get_db_context
 from src.database.models import DetectedPlate
+from src.config import KEYPOINT_MODEL_PATH, OCR_MODEL_PATH
 
 
 st.set_page_config(
@@ -18,7 +19,7 @@ st.set_page_config(
 @st.cache_resource
 def load_pipeline():
   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-  return ANPRPipeline("license_plate_keypoint.pt", "outputs/checkpoints/best.pt", device)
+  return ANPRPipeline(KEYPOINT_MODEL_PATH, OCR_MODEL_PATH, device)
 
 pipeline = load_pipeline()
 
