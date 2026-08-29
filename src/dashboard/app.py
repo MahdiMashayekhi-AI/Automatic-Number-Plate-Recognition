@@ -38,11 +38,11 @@ with tab1:
       imarr = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
       image = cv2.imdecode(imarr, cv2.IMREAD_COLOR)
 
-      results = pipeline.process_frame(image)
+      results = pipeline.process_image(image)
 
-      for track_id, data in results.items():
-        xmin, ymin , xmax, ymax = data['bbox']
-        plate_text = data['text']
+      for result in results:
+        xmin, ymin , xmax, ymax = result['bbox']
+        plate_text = result['plate_text']
         cv2.rectangle(image, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
         cv2.putText(image, plate_text, (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
 
@@ -51,27 +51,34 @@ with tab1:
     elif file_extention in ['mp4', 'avi']:
       tfile = tempfile.NamedTemporaryFile(delete=False)
       tfile.write(uploaded_file.read())
+      
+      pipeline.reset()
 
-      cap = cv2.VideoCapture(tfile.name)
-      st_frame = st.empty()
+      try:
+        cap = cv2.VideoCapture(tfile.name)
+        st_frame = st.empty()
 
-      while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-          break
+        while cap.isOpened():
+          ret, frame = cap.read()
+          if not ret:
+            break
 
-        results = pipeline.process_frame(frame)
+          results = pipeline.process_frame(frame)
 
-        for track_id, data in results.items():
-          xmin, ymin, xmax, ymax = data['bbox']
-          plate_text = data['text']
-          cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
-          cv2.putText(frame, f"Id: {track_id} | {plate_text}", (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+          for track_id, data in results.items():
+            xmin, ymin, xmax, ymax = data['bbox']
+            plate_text = data['text']
+            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
+            cv2.putText(frame, f"Id: {track_id} | {plate_text}", (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
 
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        st_frame.image(frame, channels="RGB")
+          frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+          st_frame.image(frame, channels="RGB")
 
-      cap.release()
+        cap.release()
+
+      finally:
+        pipeline.reset()
+        cap.release()
 
 
 with tab2:
