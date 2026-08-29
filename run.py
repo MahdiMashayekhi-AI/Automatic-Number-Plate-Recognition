@@ -3,6 +3,7 @@ import torch
 import logging
 from src.logger import setup_logger
 from src.pipeline import ANPRPipeline
+from src.config import KEYPOINT_MODEL_PATH, OCR_MODEL_PATH
 
 
 def main():
@@ -10,13 +11,11 @@ def main():
 
   logger = logging.getLogger(__name__)
 
-  TRACKER_MODEL = "license_plate_keypoint.pt"
-  OCR_MODEL = "outputs/checkpoints/best.pt"
   VIDEO_PATH = "./data/samples/Tehran-Traffic.mp4"
   DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
   logger.info("Loading ANPR Pipeline...")
-  pipeline = ANPRPipeline(TRACKER_MODEL, OCR_MODEL, DEVICE)
+  pipeline = ANPRPipeline(KEYPOINT_MODEL_PATH, OCR_MODEL_PATH, DEVICE)
 
   cap = cv2.VideoCapture(VIDEO_PATH)
   if not cap.isOpened():

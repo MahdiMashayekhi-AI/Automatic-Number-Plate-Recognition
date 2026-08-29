@@ -24,3 +24,6 @@ IMAGE_HEIGHT = 32
 BATCH_SIZE = 32
 LEARNING_RATE = 0.001
 EPOCHS = 50
+
+KEYPOINT_MODEL_PATH = "license_plate_keypoint.pt"
+OCR_MODEL_PATH = "outputs/checkpoints/best.pt"
