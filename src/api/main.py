@@ -63,7 +63,7 @@ def search_plates(q:Optional[str] = Query(None, min_length=1, description="Plate
   plates = query.order_by(DetectedPlate.created_at.desc()).limit(limit).all()
 
   if not plates:
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Np plates found matching: {q}")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No plates found matching: {q}")
   
   return [
     {
@@ -166,7 +166,7 @@ async def detect_plates_from_video(file: UploadFile = File(..., description="Vid
         ]
 
     except HTTPException:
-       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Could not open video file")
+       raise
     
     except Exception as e:
       raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error processing video: {str(e)}")

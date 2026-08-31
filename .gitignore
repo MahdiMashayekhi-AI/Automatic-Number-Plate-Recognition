@@ -232,3 +232,6 @@ data/
 
 # Runs and Experiments
 **/runs/**
+
+# Plates
+**/plates/**
