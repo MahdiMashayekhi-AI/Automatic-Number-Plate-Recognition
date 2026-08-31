@@ -1,3 +1,4 @@
+import os
 import cv2
 from src.tracking.tracker import PlateTracker
 from src.detection.detector import PlateDetector
@@ -7,12 +8,13 @@ from src.ocr.predictor import PlateReader
 from src.decision.voting import TemporalVoter
 from src.database.connection import get_db_context, Base, engine
 from src.database.models import DetectedPlate
-from src.config import BLUR_THRESHOLD
+from src.config import BLUR_THRESHOLD, PLATE_CROP_DIR
 
 
 class ANPRPipeline:
   def __init__(self, tracker_model_path, ocr_model_path, device=None, blur_threshold=BLUR_THRESHOLD):
     Base.metadata.create_all(bind=engine)
+    os.makedirs(PLATE_CROP_DIR, exist_ok=True)
 
     self.tracker = PlateTracker(tracker_model_path)
     self.detector = PlateDetector(tracker_model_path)
@@ -41,12 +43,18 @@ class ANPRPipeline:
 
       if final_plate_text is not None:
         if track_id not in self.saved_track:
-          self._save_to_db(track_id, final_plate_text, state['conf'])
+          self._save_to_db(track_id, final_plate_text, state['conf'], state['plate'])
         state['text'] = final_plate_text
+        state['is_confident'] = True
+        state['reason'] = None
       elif best_guess is not None:
         state['text'] = best_guess
+        state['is_confident'] = False
+        state['reason'] = "Awaiting Confirmation"
       else:
         state['text'] = "Detecting"
+        state['is_confident'] = False
+        state['reason'] = "No Valid Reading Yet"
 
       frame_results[track_id] = state
 
@@ -79,7 +87,8 @@ class ANPRPipeline:
           "is_confident": False,
           "reason": "low_sharpness",
           "score": result['score'],
-          "bbox": result['bbox']
+          "bbox": result['bbox'],
+          "plate_image": result['image']
         })
         continue
 
@@ -94,7 +103,8 @@ class ANPRPipeline:
         "is_confident": is_valid,
         "reason": None if is_valid else "invalid_format",
         "score": result['score'],
-        "bbox": result['bbox']
+        "bbox": result['bbox'],
+        "plate_image": result['image']
       })
 
     return outputs
@@ -105,11 +115,19 @@ class ANPRPipeline:
     self.missing_frames = {}
     self.saved_track = set()
   
-  def _save_to_db(self, track_id, plate_text, confidence):
+  def _save_to_db(self, track_id, plate_text, confidence, plate_image):
     if track_id not in self.saved_track:
         with get_db_context() as db:
           plate = DetectedPlate(track_id=track_id, plate_text=plate_text, confidence=confidence)
           db.add(plate)
+          db.flush()
+
+          file_name = f"{plate.id}.jpg"
+          full_path = os.path.join(PLATE_CROP_DIR, file_name)
+
+          cv2.imwrite(full_path, plate_image)
+
+          plate.image_path = file_name
 
         self.saved_track.add(track_id)
 

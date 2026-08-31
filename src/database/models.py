@@ -10,4 +10,5 @@ class DetectedPlate(Base):
   track_id = Column(Integer, index=True)
   plate_text = Column(String(8), nullable=False)
   confidence = Column(Float, nullable=False)
+  image_path = Column(String, nullable=True)
   created_at = Column(DateTime, default=datetime.now)
