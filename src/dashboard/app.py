@@ -1,4 +1,6 @@
 import cv2
+import math
+import time
 import torch
 import tempfile
 import numpy as np
@@ -119,6 +121,29 @@ with tab1:
             try:
                 cap = cv2.VideoCapture(tfile.name)
 
+                video_fps = cap.get(cv2.CAP_PROP_FPS)
+
+                measure_frames = 5
+                times = []
+
+                for _ in range(measure_frames):
+                    ret, frame = cap.read()
+                    if not ret:
+                        break
+
+                    start_time = time.time()
+                    pipeline.process_frame(frame)
+                    elapsed_time = time.time() - start_time
+
+                    times.append(elapsed_time)
+
+                avg_time = sum(times) / len(times)
+                achievable_fps = 1 / avg_time
+
+                PROCESS_EVERY_N_FRAMES = max(1, math.ceil(video_fps / achievable_fps))
+
+                target_interval = PROCESS_EVERY_N_FRAMES / video_fps
+
                 kpi1, kpi2, kpi3 = st.columns(3)
                 metric_total = kpi1.empty()
                 metric_valid = kpi2.empty()
@@ -135,35 +160,57 @@ with tab1:
                     st.subheader("📜 Live Recognition Log")
                     history_placeholder = st.empty()
 
+                frame_counter = 0
+                last_results = {}
+
                 while cap.isOpened():
                     ret, frame = cap.read()
                     if not ret:
                         break
 
-                    results = pipeline.process_frame(frame)
+                    frame_counter += 1
 
-                    for track_id, data in results.items():
-                        xmin, ymin, xmax, ymax = data['bbox']
-                        plate_text = data['text']
-                        color = (0, 255, 0) if data['is_confident'] else (0, 165, 225)
-                        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 3)
-                        cv2.putText(frame, f"ID: {track_id} | {plate_text}", (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+                    should_process = frame_counter % PROCESS_EVERY_N_FRAMES == 0 or frame_counter == 1
 
-                        plate_history[track_id] = {
-                            "plate_image": data['plate'],
-                            "plate_text": data['text'],
-                            "conf": data['conf'],
-                            "is_confident": data['is_confident'],
-                            "reason": data['reason']
-                        }
+                    if should_process:
+                        loop_start = time.time()
 
-                    t_count = len(plate_history)
-                    v_count = sum(1 for item in plate_history.values() if item['is_confident'])
-                    c_avg = (sum(item['conf'] for item in plate_history.values()) / t_count * 100) if t_count > 0 else 0.0
+                        last_results = pipeline.process_frame(frame)
 
-                    metric_total.metric("Unique Plates Detected", t_count)
-                    metric_valid.metric("Valid Format Count", v_count)
-                    metric_conf.metric("Mean Confidence", f"{c_avg:.1f}%")
+                        for track_id, data in last_results.items():
+                            xmin, ymin, xmax, ymax = data['bbox']
+                            plate_text = data['text']
+                            color = (0, 255, 0) if data['is_confident'] else (0, 165, 225)
+                            cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 3)
+                            cv2.putText(frame, f"ID: {track_id} | {plate_text}", (xmin, ymin - 10),
+                                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+
+                            plate_history[track_id] = {
+                                "plate_image": data['plate'],
+                                "plate_text": data['text'],
+                                "conf": data['conf'],
+                                "is_confident": data['is_confident'],
+                                "reason": data['reason']
+                            }
+
+                        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                        st_frame.image(frame, channels="RGB", use_container_width=True)
+
+                        t_count = len(plate_history)
+                        v_count = sum(1 for item in plate_history.values() if item['is_confident'])
+                        c_avg = (sum(
+                            item['conf'] for item in plate_history.values()) / t_count * 100) if t_count > 0 else 0.0
+
+                        metric_total.metric("Unique Plates Detected", t_count)
+                        metric_valid.metric("Valid Format Count", v_count)
+                        metric_conf.metric("Mean Confidence", f"{c_avg:.1f}%")
+
+                        elapsed_time = time.time() - loop_start
+                        remaining = target_interval - elapsed_time
+
+                        if remaining > 0:
+                            # time.sleep(remaining)
+                            pass
 
                     current_snapshot = tuple((k, v['plate_text']) for k, v in plate_history.items())
 
@@ -188,9 +235,6 @@ with tab1:
                                             st.warning(f"{item['reason']}", icon="⚠️")
 
                                         st.caption(f"Score: **{item['conf']*100:.1f}%**")
-
-                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    st_frame.image(frame, channels="RGB", use_container_width=True)
 
                 cap.release()
 

@@ -85,7 +85,7 @@ class ANPRPipeline:
         outputs.append({
           "plate_text": None,
           "is_confident": False,
-          "reason": "low_sharpness",
+          "reason": "Low Sharpness",
           "score": result['score'],
           "bbox": result['bbox'],
           "plate_image": result['image']
@@ -101,7 +101,7 @@ class ANPRPipeline:
       outputs.append({
         "plate_text": raw_prediction,
         "is_confident": is_valid,
-        "reason": None if is_valid else "invalid_format",
+        "reason": None if is_valid else "Invalid Format",
         "score": result['score'],
         "bbox": result['bbox'],
         "plate_image": result['image']
