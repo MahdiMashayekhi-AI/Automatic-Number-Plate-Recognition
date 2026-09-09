@@ -29,3 +29,7 @@ KEYPOINT_MODEL_PATH = "license_plate_keypoint.pt"
 OCR_MODEL_PATH = "outputs/checkpoints/best.pt"
 
 PLATE_CROP_DIR = "outputs/plates"
+
+PROCESS_EVERY_N_FRAMES = 3
+
+VIDEO_PATH = "./data/samples/Tehran-Traffic.mp4"

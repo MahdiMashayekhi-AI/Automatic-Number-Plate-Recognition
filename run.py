@@ -3,7 +3,7 @@ import torch
 import logging
 from src.logger import setup_logger
 from src.pipeline import ANPRPipeline
-from src.config import KEYPOINT_MODEL_PATH, OCR_MODEL_PATH
+from src.config import KEYPOINT_MODEL_PATH, OCR_MODEL_PATH, VIDEO_PATH, PROCESS_EVERY_N_FRAMES
 
 
 def main():
@@ -11,7 +11,6 @@ def main():
 
   logger = logging.getLogger(__name__)
 
-  VIDEO_PATH = "./data/samples/Tehran-Traffic.mp4"
   DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
   logger.info("Loading ANPR Pipeline...")
@@ -21,6 +20,9 @@ def main():
   if not cap.isOpened():
     logger.error(f"Could not open video: {VIDEO_PATH}")
     return
+
+  frame_counter = 0
+  last_results = {}
   
   logger.info("Starting video processing. Press 'q' to quit.")
   while cap.isOpened():
@@ -28,9 +30,12 @@ def main():
     if not ret:
       break
 
-    results = pipeline.process_frame(frame)
+    frame_counter += 1
 
-    for track_id, data in results.items():
+    if frame_counter % PROCESS_EVERY_N_FRAMES == 0:
+      last_results = pipeline.process_frame(frame)
+
+    for track_id, data in last_results.items():
       xmin, ymin, xmax, ymax = data['bbox']
       plate_text = data['text']
       conf = data['conf']
