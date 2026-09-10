@@ -20,12 +20,12 @@ def evaluate():
   device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
   logger.info(f"Device is {device}")
 
-  test_dataset = PlateDataset("data/raw", 'test_labels.txt', return_path=True)
+  test_dataset = PlateDataset("data/ocr", 'test_labels.txt', return_path=True)
 
   test_loader = DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
   model = CRNN(input_channel=1, num_classes=len(CHAR_LIST), hidden_size=256)
-  checkpoint = torch.load("outputs/checkpoints/best.pt", map_location=device)
+  checkpoint = torch.load("outputs/checkpoints/ocr/best.pt", map_location=device)
   model.load_state_dict(checkpoint['model_state_dict'])
   model.to(device)
   model.eval()

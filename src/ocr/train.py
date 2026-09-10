@@ -28,8 +28,8 @@ def train():
   device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
   logger.info(f"Device is {device}")
   
-  train_dataset = PlateDataset("data/raw/", "train_labels.txt", None)
-  val_dataset = PlateDataset("data/raw/", "val_labels.txt", None)
+  train_dataset = PlateDataset("data/ocr/", "train_labels.txt", None)
+  val_dataset = PlateDataset("data/ocr/", "val_labels.txt", None)
 
   train_loader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=True)
   val_loader = DataLoader(dataset=val_dataset, batch_size=BATCH_SIZE, shuffle=False)
@@ -44,7 +44,7 @@ def train():
   best_sequence_accuracy = 0
 
   if args.resume:
-    checkpoint = torch.load("outputs/checkpoints/last.pt", map_location=device)
+    checkpoint = torch.load("outputs/checkpoints/ocr/last.pt", map_location=device)
 
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
@@ -155,9 +155,9 @@ def train():
     }
 
     if is_best:
-      torch.save(checkpoint, "outputs/checkpoints/best.pt")
+      torch.save(checkpoint, "outputs/checkpoints/ocr/best.pt")
 
-    torch.save(checkpoint, "outputs/checkpoints/last.pt")
+    torch.save(checkpoint, "outputs/checkpoints/ocr/last.pt")
 
     sample_pred = ctc_decode(log_probs.detach())[0]
     sample_target = ''.join([IDX2CHAR[c.item()] for c in label[0][:label_len[0].item()]])

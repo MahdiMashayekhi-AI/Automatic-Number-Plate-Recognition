@@ -26,7 +26,7 @@ LEARNING_RATE = 0.001
 EPOCHS = 50
 
 KEYPOINT_MODEL_PATH = "license_plate_keypoint.pt"
-OCR_MODEL_PATH = "outputs/checkpoints/best.pt"
+OCR_MODEL_PATH = "outputs/checkpoints/ocr/best.pt"
 
 PLATE_CROP_DIR = "outputs/plates"
 
