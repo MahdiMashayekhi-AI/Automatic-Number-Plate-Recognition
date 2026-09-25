@@ -59,10 +59,12 @@ def compute_aspect_ratio(ordered_points):
 def is_valid_geometry(ordered_points):
   area = compute_quad_area(ordered_points)
   if area < MIN_QUAD_AREA:
-    return False
+    # return False
+    print("Skipping in geometry!")
 
   ratio = compute_aspect_ratio(ordered_points)
   if ratio < MIN_ASPECT_RATIO or ratio > MAX_ASPECT_RATIO:
-    return False
+    # return False
+    print("Skipping in geometry!")
 
   return True

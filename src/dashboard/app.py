@@ -1,5 +1,4 @@
 import cv2
-import math
 import time
 import torch
 import tempfile
@@ -9,7 +8,7 @@ import streamlit as st
 from src.pipeline import ANPRPipeline
 from src.database.connection import get_db_context
 from src.database.models import DetectedPlate
-from src.config import KEYPOINT_MODEL_PATH, OCR_MODEL_PATH
+from src.config import KEYPOINT_MODEL_PATH, OCR_MODEL_PATH, PROCESS_EVERY_N_FRAMES
 from src.display.formatting import change_fa_to_en
 
 
@@ -123,26 +122,7 @@ with tab1:
 
                 video_fps = cap.get(cv2.CAP_PROP_FPS)
 
-                measure_frames = 5
-                times = []
-
-                for _ in range(measure_frames):
-                    ret, frame = cap.read()
-                    if not ret:
-                        break
-
-                    start_time = time.time()
-                    pipeline.process_frame(frame)
-                    elapsed_time = time.time() - start_time
-
-                    times.append(elapsed_time)
-
-                avg_time = sum(times) / len(times)
-                achievable_fps = 1 / avg_time
-
-                PROCESS_EVERY_N_FRAMES = max(1, math.ceil(video_fps / achievable_fps))
-
-                target_interval = PROCESS_EVERY_N_FRAMES / video_fps
+                target_interval = 1.0 / video_fps if video_fps > 0 else 0.0
 
                 kpi1, kpi2, kpi3 = st.columns(3)
                 metric_total = kpi1.empty()
@@ -209,7 +189,7 @@ with tab1:
                         remaining = target_interval - elapsed_time
 
                         if remaining > 0:
-                            # time.sleep(remaining)
+                            time.sleep(remaining)
                             pass
 
                     current_snapshot = tuple((k, v['plate_text']) for k, v in plate_history.items())

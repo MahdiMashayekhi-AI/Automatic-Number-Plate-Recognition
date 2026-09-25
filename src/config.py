@@ -25,11 +25,13 @@ BATCH_SIZE = 32
 LEARNING_RATE = 0.001
 EPOCHS = 50
 
-KEYPOINT_MODEL_PATH = "license_plate_keypoint.pt"
+# "outputs/checkpoints/pose/best.pt"
+# "license_plate_keypoint.pt"
+KEYPOINT_MODEL_PATH = "outputs/checkpoints/pose/best.pt"
 OCR_MODEL_PATH = "outputs/checkpoints/ocr/best.pt"
 
 PLATE_CROP_DIR = "outputs/plates"
 
-PROCESS_EVERY_N_FRAMES = 3
+PROCESS_EVERY_N_FRAMES = 1
 
-VIDEO_PATH = "./data/samples/Tehran-Traffic.mp4"
+VIDEO_PATH = "./data/samples/video-1.mp4"
