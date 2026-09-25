@@ -14,7 +14,7 @@ class PlateTracker:
     current_active_tracks = set()
     current_frame_output = {}
 
-    results = self.model.track(frame, tracker='custom_tracker.yaml', persist=True, conf=0.3, imgsz=960)
+    results = self.model.track(frame, tracker='custom_tracker.yaml', persist=True, conf=0.1, imgsz=960)
 
     for result in results:
       boxes = result.boxes
