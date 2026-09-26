@@ -14,15 +14,15 @@
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Status](https://img.shields.io/badge/Status-v1.0%20Initial%20Release-orange)]()
 
-<img width="1918" height="867" alt="Image" src="https://github-production-user-asset-6210df.s3.amazonaws.com/108976550/659414670-2ba7c6d3-67e8-4d89-8a9d-a6d17c83dd02.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20260926%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260926T111350Z&X-Amz-Expires=300&X-Amz-Signature=ce3326a686f6985052acd322e773f0b9717b7d98498c466004134b5575f8911c&X-Amz-SignedHeaders=host&response-content-type=image%2Fpng" />
+<img width="1918" height="867" alt="Image" src="https://github.com/user-attachments/assets/cd6656a8-cb6a-4f53-87cb-c69f08c74dce" />
 
-<img width="1918" height="862" alt="Image" src="https://github-production-user-asset-6210df.s3.amazonaws.com/108976550/659419725-14659b6c-be98-4391-b89a-d3be8aea86ad.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20260926%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260926T114713Z&X-Amz-Expires=300&X-Amz-Signature=b23f6c1f73def9fc4ad0a6f11a574b66907f10638d1744e1e455198f023b5574&X-Amz-SignedHeaders=host&response-content-type=image%2Fpng" />
+<img width="1918" height="862" alt="Image" src="https://github.com/user-attachments/assets/aee95d87-26de-4908-a1df-c13e3d74c851" />
 
 <video src="https://github-production-user-asset-6210df.s3.amazonaws.com/108976550/659418603-04551779-b793-46fe-973b-deb6457ef883.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20260926%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260926T114119Z&X-Amz-Expires=300&X-Amz-Signature=c2bdca4a6a5aa4087f4759da3b9ca1a2efb10901b7558abddc5b33ab030a7c4c&X-Amz-SignedHeaders=host&response-content-type=video%2Fmp4" controls width="800"></video>
 
 ## Demo for video on Youtube
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/l7ReHWg6evw?si=O8KKceCNGbrdqsts" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+[![ANPR Demo](https://img.youtube.com/vi/l7ReHWg6evw/maxresdefault.jpg)](https://www.youtube.com/watch?v=l7ReHWg6evw)
 
 ---
 
