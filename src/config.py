@@ -34,4 +34,4 @@ PLATE_CROP_DIR = "outputs/plates"
 
 PROCESS_EVERY_N_FRAMES = 1
 
-VIDEO_PATH = "./data/samples/video-1.mp4"
+VIDEO_PATH = "./data/samples/video-4.mp4"

@@ -43,9 +43,59 @@ def main():
       cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
 
       label = f"ID: {track_id} | {plate_text} ({conf:.2f})"
-      cv2.putText(frame, label, (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
-    cv2.imshow("ANPR Production Test", frame)
+      text = label
+      font = cv2.FONT_HERSHEY_SIMPLEX
+      font_scale = 0.6
+      thickness = 2
+
+      (text_width, text_height), baseline = cv2.getTextSize(
+          text,
+          font,
+          font_scale,
+          thickness
+      )
+
+      padding = 6
+
+      x1 = xmin
+      y1 = max(0, ymin - text_height - baseline - padding )
+
+      x2 = xmin + text_width + padding * 2
+      y2 = ymin
+
+      overlay = frame.copy()
+
+      cv2.rectangle(
+          overlay,
+          (x1, y1),
+          (x2, y2),
+          (0, 0, 0),
+          -1
+      )
+
+      alpha = 0.5
+
+      frame = cv2.addWeighted(
+          overlay,
+          alpha,
+          frame,
+          1 - alpha,
+          0
+      )
+
+      cv2.putText(
+          frame,
+          text,
+          (xmin + padding, ymin - padding),
+          font,
+          font_scale,
+          (0, 255, 0),
+          thickness,
+          cv2.LINE_AA
+      )
+
+    cv2.imshow("ANPR Production", frame)
 
     if cv2.waitKey(1) & 0xff == ord('q'):
       break
